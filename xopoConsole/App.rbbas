@@ -122,7 +122,7 @@ Inherits ConsoleApplication
 		  Dim folderBase, folderMove, folderMoveTo As FolderItem
 		  
 		  Dim folderShellBaseOption As Option = mOptions.OptionValue(kOptionFolderShellBase)
-		  If folderShellBaseOption.WasSet Then 
+		  If folderShellBaseOption.WasSet Then
 		    Try
 		      folderBase= New FolderItem(folderShellBaseOption.Value.StringValue, FolderItem.PathTypeShell)
 		      folderMove= folderBase.Child(folderMoveStr)
@@ -161,14 +161,28 @@ Inherits ConsoleApplication
 		    If folderMoveStr.Right(1)= "\" Then folderMoveStr= folderMoveStr.Left(folderMoveStr.Len- 1)
 		    Dim afolderMove() As String= folderMoveStr.Split("\")
 		    Dim  folderMoveToTemp As String= folderMoveToStr
-		    If folderMoveToStr.Right(1)= "\" Then folderMoveToTemp= folderMoveToStr.Left(folderMoveToStr.Len- 1)
+		    'If folderMoveToStr.Right(1)= "\" Then folderMoveToTemp= folderMoveToStr.Left(folderMoveToStr.Len- 1)
+		    '
+		    'cmd= "rd /S /Q """+ folderMoveToTemp+ "\"+ afolderMove(afolderMove.Ubound)+ """"
+		    'System.DebugLog cmd
+		    'sh.Execute cmd
+		    'System.DebugLog sh.Result
+		    '
+		    'cmd= "move /Y """+ folderMoveStr+ """ """+ folderMoveToStr+ """"
+		    'System.DebugLog cmd
+		    'sh.Execute cmd
+		    'System.DebugLog sh.Result
 		    
-		    cmd= "rd /S /Q """+ folderMoveToTemp+ "\"+ afolderMove(afolderMove.Ubound)+ """"
+		    If folderMoveToStr.Right(1)<> "\" Then folderMoveToTemp= folderMoveToStr+ "\"
+		    
+		    cmd= "xcopy """+ folderMoveStr+ """ """+ folderMoveToTemp+ afolderMove(afolderMove.Ubound)+ """ /S /I /F /Y"
 		    System.DebugLog cmd
 		    sh.Execute cmd
 		    System.DebugLog sh.Result
 		    
-		    cmd= "move /Y """+ folderMoveStr+ """ """+ folderMoveToStr+ """"
+		    If sh.ErrorCode<> 0 Then PrintAndQuit("shell xcopy error", sh.ErrorCode)
+		    
+		    cmd= "rd /S /Q """+ folderMoveStr+ """"
 		    System.DebugLog cmd
 		    sh.Execute cmd
 		    System.DebugLog sh.Result
@@ -377,7 +391,7 @@ Inherits ConsoleApplication
 	#tag Constant, Name = kOptionVersion, Type = String, Dynamic = False, Default = \"version", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = kVersion, Type = String, Dynamic = False, Default = \"0.0.180809", Scope = Private
+	#tag Constant, Name = kVersion, Type = String, Dynamic = False, Default = \"0.0.180818", Scope = Private
 	#tag EndConstant
 
 
