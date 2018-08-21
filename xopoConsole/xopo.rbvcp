@@ -10,6 +10,7 @@ Class=OptionMissingKeyException;OptionParser/OptionMissingKeyException.rbbas;&h7
 Class=OptionParser;OptionParser/OptionParser.rbbas;&h523637FF;&h684437FF;false
 Class=OptionParserException;OptionParser/OptionParserException.rbbas;&h7FBB57FF;&h684437FF;false
 Class=OptionUnrecognizedKeyException;OptionParser/OptionUnrecognizedKeyException.rbbas;&h6C550FFF;&h684437FF;false
+Module=Xopo;Xopo.rbbas;&h623ADFFF;&h0;false
 MajorVersion=0
 MinorVersion=0
 SubVersion=0
