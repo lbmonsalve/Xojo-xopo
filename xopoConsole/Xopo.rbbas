@@ -31,12 +31,17 @@ Protected Module Xopo
 		  o = New Option("", kOptionFolderShellBase, "shellPath folder base (optional)", Option.OptionType.String)
 		  parser.AddOption o
 		  
-		  'o = New Option("", kOptionGitClone, "the remote repository to clone", Option.OptionType.String)
-		  'parser.AddOption o
-		  '
-		  'o = New Option("", kOptionGitCloneToPath, "local directory to clone to", Option.OptionType.Directory)
-		  'parser.AddOption o
+		  o = New Option("", kOptionGitClone, "the remote repository to clone", Option.OptionType.String)
+		  parser.AddOption o
 		  
+		  o = New Option("", kOptionGitCloneToPath, "local directory to clone to", Option.OptionType.Directory)
+		  parser.AddOption o
+		  
+		  o = New Option("", kOptionGitUserName, "username credential", Option.OptionType.String)
+		  parser.AddOption o
+		  
+		  o = New Option("", kOptionGitUserPwd, "password credential", Option.OptionType.String)
+		  parser.AddOption o
 		  
 		  parser.AdditionalHelpNotes = "xopo  Copyright (C) 2018  Bernardo Monsalve."+ EndOfLine+ _
 		  "This program comes with ABSOLUTELY NO WARRANTY;"+ EndOfLine+ _
@@ -59,12 +64,21 @@ Protected Module Xopo
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub HandlerCheckoutProgress(path As String, cur As UInt32, tot As UInt32)
+		  Const frmtI= "####"
+		  
+		  'System.DebugLog CurrentMethodName+ " path="+ path+ " cur="+ Str(cur)+ " tot="+ Str(tot)
+		  Print "checkout "+ Str(cur, frmtI)+ "/"+ Str(tot, frmtI)+ " "+ path
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub PrintAndQuit(msg As String, ret As Integer = 10)
 		  Print ""
 		  Print msg
 		  Print ""
-		  mOptions.ShowHelp
+		  'mOptions.ShowHelp
 		  
 		  Quit ret
 		End Sub
@@ -150,6 +164,57 @@ Protected Module Xopo
 		  #endif
 		  
 		  'Quit 0
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub ProcessGitClone(theOption As Option)
+		  If theOption.Value.IsNull Then PrintAndQuit("git url repo option is empty")
+		  
+		  Dim repoURL As String= theOption.Value.StringValue
+		  If repoURL= "" Then PrintAndQuit("repo url to clone STR is empty")
+		  
+		  Dim toPathFolder As FolderItem
+		  
+		  Dim toPath As Option = mOptions.OptionValue(kOptionGitCloneToPath)
+		  If toPath.WasSet Then
+		    toPathFolder= toPath.Value
+		  Else
+		    toPathFolder= GetFolderItem("")
+		  End If
+		  
+		  If toPathFolder Is Nil Then PrintAndQuit("cloneToPath DIR is nil")
+		  If toPathFolder.Exists And toPathFolder.Directory Then PrintAndQuit("cloneToPAth DIR exist")
+		  
+		  Dim toPathFolderStr As String
+		  #if RBVersion < 2013
+		    toPathFolderStr= toPathFolder.AbsolutePath
+		  #else
+		    toPathFolderStr= toPathFolder.NativePath
+		  #endif
+		  
+		  Dim userNameStr, userPwdStr As String
+		  
+		  Dim userName As Option = mOptions.OptionValue(kOptionGitUserName)
+		  If userName.WasSet Then userNameStr= userName.Value.StringValue
+		  
+		  Dim userPwd As Option = mOptions.OptionValue(kOptionGitUserPwd)
+		  If userPwd.WasSet Then userPwdStr= userPwd.Value.StringValue
+		  
+		  Dim cred As libgit2.Credentials
+		  
+		  If userNameStr<> "" And userPwdStr<> "" Then cred= New libgit2.Credentials(userNameStr, userPwdStr)
+		  
+		  libgit2.Init
+		  
+		  Try
+		    libgit2.Clone repoURL, toPathFolderStr, cred, AddressOf HandlerCheckoutProgress
+		  Catch e As RuntimeException
+		    libgit2.Shutdown
+		    PrintAndQuit e.Message, e.ErrorNumber
+		  End Try
+		  
+		  libgit2.Shutdown
 		End Sub
 	#tag EndMethod
 
@@ -291,6 +356,18 @@ Protected Module Xopo
 	#tag Constant, Name = kOptionFolderShellBase, Type = String, Dynamic = False, Default = \"folderShellBase", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = kOptionGitClone, Type = String, Dynamic = False, Default = \"gitClone", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = kOptionGitCloneToPath, Type = String, Dynamic = False, Default = \"gitCloneToPath", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = kOptionGitUserName, Type = String, Dynamic = False, Default = \"gitUserName", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = kOptionGitUserPwd, Type = String, Dynamic = False, Default = \"gitUserPwd", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = kOptionProject, Type = String, Dynamic = False, Default = \"project", Scope = Protected
 	#tag EndConstant
 
@@ -306,7 +383,7 @@ Protected Module Xopo
 	#tag Constant, Name = kOptionVersion, Type = String, Dynamic = False, Default = \"version", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Version, Type = String, Dynamic = False, Default = \"0.0.180820", Scope = Protected
+	#tag Constant, Name = Version, Type = String, Dynamic = False, Default = \"0.0.180823", Scope = Protected
 	#tag EndConstant
 
 

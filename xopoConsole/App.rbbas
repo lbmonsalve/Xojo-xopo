@@ -9,7 +9,6 @@ Inherits ConsoleApplication
 		  
 		  mOptions = Xopo.GetOptions
 		  
-		  #pragma BreakOnExceptions Off
 		  Try
 		    mOptions.Parse args
 		  Catch e As RuntimeException
@@ -17,7 +16,6 @@ Inherits ConsoleApplication
 		    Print ""
 		    Return 1
 		  End Try
-		  #pragma BreakOnExceptions Default
 		  
 		  If mOptions.HelpRequested Then
 		    PrintHelp
@@ -37,8 +35,10 @@ Inherits ConsoleApplication
 		  theOption = mOptions.OptionValue(Xopo.kOptionFolderMove)
 		  If theOption.WasSet Then Xopo.ProcessFolderMove(theOption)
 		  
-		  'theOption = mOptions.OptionValue(Xopo.kOptionGitClone)
-		  'If theOption.WasSet Then Xopo.ProcessGitClone(theOption)
+		  theOption = mOptions.OptionValue(Xopo.kOptionGitClone)
+		  If theOption.WasSet Then Xopo.ProcessGitClone(theOption)
+		  
+		  Return 0
 		End Function
 	#tag EndEvent
 
@@ -94,6 +94,9 @@ Inherits ConsoleApplication
 		--folderShellBase=C:\Users\Usuario\DOCUME~1\Repos\XOJO-S~1\STORAG~2 --folderMove="StorageFactory" --folderMoveTo="../"
 		
 		--folderMove="C:\Users\Usuario\Documents\Temp\xml" --folderMoveTo="C:\Users\Usuario\Documents"
+		
+		--gitClone="https://github.com/libgit2/TestGitRepository.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\TestGitRepository"
+		--gitClone="https://gitlab.com/lbmonsalve/Xojo-BinaryMessage.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\BinaryMessage" --gitUserName=lbmonsalve --gitUserPwd=5847gLabLuis
 	#tag EndNote
 
 
