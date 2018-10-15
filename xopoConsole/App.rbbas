@@ -3,6 +3,7 @@ Protected Class App
 Inherits ConsoleApplication
 	#tag Event
 		Function Run(args() as String) As Integer
+		  
 		  // xopo - Command line helper for xojo vcp projects.
 		  // Copyright (C) 2018  Bernardo Monsalve, see Copyright note
 		  // https://github.com/lbmonsalve/Xojo-xopo.git
@@ -96,7 +97,7 @@ Inherits ConsoleApplication
 		--folderMove="C:\Users\Usuario\Documents\Temp\xml" --folderMoveTo="C:\Users\Usuario\Documents"
 		
 		--gitClone="https://github.com/libgit2/TestGitRepository.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\TestGitRepository"
-		--gitClone="https://gitlab.com/lbmonsalve/Xojo-BinaryMessage.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\BinaryMessage" --gitUserName=lbmonsalve --gitUserPwd=5847gLabLuis
+		--gitClone="https://gitlab.com/lbmonsalve/Xojo-BinaryMessage.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\BinaryMessage" --gitUserName=USR --gitUserPwd=PWD
 	#tag EndNote
 
 

@@ -39,7 +39,7 @@ MDICaption=
 DefaultEncoding=&h0
 AppIcon=xopo.rbres;&h0
 OSXBundleID=com.lbmsoft.xopo
-DebuggerCommandLine=--gitClone="https://github.com/libgit2/TestGitRepository.git" --gitCloneToPath="C:\Users\Usuario\Documents\Temp\TestGitRepository"
+DebuggerCommandLine=-h
 UseGDIPlus=False
 UseBuildsFolder=True
 IsWebProject=False
