@@ -43,7 +43,7 @@ Protected Module Xopo
 		  o = New Option("", kOptionGitUserPwd, "password credential", Option.OptionType.String)
 		  parser.AddOption o
 		  
-		  parser.AdditionalHelpNotes = "xopo  Copyright (C) 2018  Bernardo Monsalve."+ EndOfLine+ _
+		  parser.AdditionalHelpNotes = "xopo  Copyright (C) 2023  Bernardo Monsalve."+ EndOfLine+ _
 		  "This program comes with ABSOLUTELY NO WARRANTY;"+ EndOfLine+ _
 		  "This is free software, and you are welcome to redistribute it"+ EndOfLine+ _
 		  "under certain conditions."
@@ -71,6 +71,30 @@ Protected Module Xopo
 		  'System.DebugLog CurrentMethodName+ " path="+ path+ " cur="+ Str(cur)+ " tot="+ Str(tot)
 		  Print "checkout "+ Str(cur, frmtI)+ "/"+ Str(tot, frmtI)+ " "+ path
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function MoveFileOrFolder(source As FolderItem, destination As FolderItem) As Boolean
+		  Dim newItem As FolderItem= destination.Child(source.Name)
+		  If source.Directory Then
+		    newItem.CreateAsFolder
+		    If Not newItem.Exists Or Not newItem.Directory Then
+		      Return False // folder was not created - stop processing
+		    End If
+		    While source.Count> 0
+		      Dim file As FolderItem= source.Item(1)
+		      If file Is Nil Then Return False // inaccessible
+		      If Not MoveFileOrFolder(file, newItem) Then Return False // copy operation failed
+		    Wend
+		  Else // it's not a folder
+		    If newItem.Exists Then newItem.Delete
+		    source.CopyFileTo newItem
+		    If source.LastErrorCode <> 0 Then Return False
+		  End If
+		  source.Delete
+		  
+		  Return True
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
@@ -127,41 +151,47 @@ Protected Module Xopo
 		    #endif
 		  End If
 		  
-		  Dim sh As New Shell
-		  Dim cmd As String
+		  If Not MoveFileOrFolder(folderMove, folderMoveTo) Then
+		    PrintAndQuit("some error to move")
+		  End If
 		  
-		  #if TargetWin32
-		    If folderMoveStr.Right(1)= "\" Then folderMoveStr= folderMoveStr.Left(folderMoveStr.Len- 1)
-		    Dim afolderMove() As String= folderMoveStr.Split("\")
-		    Dim  folderMoveToTemp As String= folderMoveToStr
-		    'If folderMoveToStr.Right(1)= "\" Then folderMoveToTemp= folderMoveToStr.Left(folderMoveToStr.Len- 1)
-		    '
-		    'cmd= "rd /S /Q """+ folderMoveToTemp+ "\"+ afolderMove(afolderMove.Ubound)+ """"
-		    'System.DebugLog cmd
-		    'sh.Execute cmd
-		    'System.DebugLog sh.Result
-		    '
-		    'cmd= "move /Y """+ folderMoveStr+ """ """+ folderMoveToStr+ """"
-		    'System.DebugLog cmd
-		    'sh.Execute cmd
-		    'System.DebugLog sh.Result
-		    
-		    If folderMoveToStr.Right(1)<> "\" Then folderMoveToTemp= folderMoveToStr+ "\"
-		    
-		    cmd= "xcopy """+ folderMoveStr+ """ """+ folderMoveToTemp+ afolderMove(afolderMove.Ubound)+ """ /S /I /F /Y"
-		    System.DebugLog cmd
-		    sh.Execute cmd
-		    System.DebugLog sh.Result
-		    
-		    If sh.ErrorCode<> 0 Then PrintAndQuit("shell xcopy error", sh.ErrorCode)
-		    
-		    cmd= "rd /S /Q """+ folderMoveStr+ """"
-		    System.DebugLog cmd
-		    sh.Execute cmd
-		    System.DebugLog sh.Result
-		  #elseIf TargetMacOS Or TargetLinux
-		    
-		  #endif
+		  folderMove.Delete
+		  
+		  'Dim sh As New Shell
+		  'Dim cmd As String
+		  '
+		  '#if TargetWin32
+		  'If folderMoveStr.Right(1)= "\" Then folderMoveStr= folderMoveStr.Left(folderMoveStr.Len- 1)
+		  'Dim afolderMove() As String= folderMoveStr.Split("\")
+		  'Dim  folderMoveToTemp As String= folderMoveToStr
+		  ''If folderMoveToStr.Right(1)= "\" Then folderMoveToTemp= folderMoveToStr.Left(folderMoveToStr.Len- 1)
+		  ''
+		  ''cmd= "rd /S /Q """+ folderMoveToTemp+ "\"+ afolderMove(afolderMove.Ubound)+ """"
+		  ''System.DebugLog cmd
+		  ''sh.Execute cmd
+		  ''System.DebugLog sh.Result
+		  ''
+		  ''cmd= "move /Y """+ folderMoveStr+ """ """+ folderMoveToStr+ """"
+		  ''System.DebugLog cmd
+		  ''sh.Execute cmd
+		  ''System.DebugLog sh.Result
+		  '
+		  'If folderMoveToStr.Right(1)<> "\" Then folderMoveToTemp= folderMoveToStr+ "\"
+		  '
+		  'cmd= "xcopy """+ folderMoveStr+ """ """+ folderMoveToTemp+ afolderMove(afolderMove.Ubound)+ """ /S /I /F /Y"
+		  'System.DebugLog cmd
+		  'sh.Execute cmd
+		  'System.DebugLog sh.Result
+		  '
+		  'If sh.ErrorCode<> 0 Then PrintAndQuit("shell xcopy error", sh.ErrorCode)
+		  '
+		  'cmd= "rd /S /Q """+ folderMoveStr+ """"
+		  'System.DebugLog cmd
+		  'sh.Execute cmd
+		  'System.DebugLog sh.Result
+		  '#elseIf TargetMacOS Or TargetLinux
+		  '
+		  '#endif
 		  
 		  'Quit 0
 		End Sub
@@ -334,7 +364,7 @@ Protected Module Xopo
 	#tag Method, Flags = &h1
 		Protected Sub ProcessVersion()
 		  Print ""
-		  Print "Version: "+ Version
+		  Print "Version: "+ App.ShortVersion
 		  Print ""
 		  
 		  Quit 0
@@ -383,9 +413,44 @@ Protected Module Xopo
 	#tag Constant, Name = kOptionVersion, Type = String, Dynamic = False, Default = \"version", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Version, Type = String, Dynamic = False, Default = \"0.0.180823", Scope = Protected
+	#tag Constant, Name = Version, Type = String, Dynamic = False, Default = \"0.0.230516", Scope = Protected
 	#tag EndConstant
 
 
+	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Index"
+			Visible=true
+			Group="ID"
+			InitialValue="-2147483648"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Left"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Name"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Super"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Top"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+	#tag EndViewBehavior
 End Module
 #tag EndModule

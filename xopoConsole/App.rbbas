@@ -92,7 +92,7 @@ Inherits ConsoleApplication
 		
 		-p "C:\Users\Usuario\Documents\XojoUnitResults.txt" "Skipped"  "SkippedD"
 		
-		--folderShellBase=C:\Users\Usuario\DOCUME~1\Repos\XOJO-S~1\STORAG~2 --folderMove="StorageFactory" --folderMoveTo="../"
+		--folderShellBase=C:\Users\Usuario\DOCUME~1\Temp\build --folderMove="win" --folderMoveTo="../"
 		
 		--folderMove="C:\Users\Usuario\Documents\Temp\xml" --folderMoveTo="C:\Users\Usuario\Documents"
 		
